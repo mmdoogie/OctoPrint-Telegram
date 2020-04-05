@@ -227,7 +227,8 @@ class TMSG():
 		if timediff and timediff > 0:
 			# check the timediff
 			if self.last_notification_time + timediff*60 <= time.time():
-				self.last_notification_time = time.time();
+				self.last_notification_time = time.time()
+				self.last_z = new_z
 				return True
 		zdiff = self.main._settings.get_float(['notification_height'])
 		if zdiff and zdiff > 0.0:
@@ -239,6 +240,7 @@ class TMSG():
 				self.last_z = new_z
 				return False
 			if new_z >= self.last_z + zdiff or new_z < self.last_z:
-				self.last_z= new_z
+				self.last_notification_time = time.time()
+				self.last_z = new_z
 				return True
 		return False
