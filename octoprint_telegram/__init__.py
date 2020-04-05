@@ -262,6 +262,8 @@ class TelegramListener(threading.Thread):
 		# handle special messages from groups (/commad@BotName)
 		command = str(message['message']['text'].split('@')[0].encode('utf-8'))
 		parameter = ""
+		if not command.startswith("/"):
+			return
 		# TODO: Do we need this anymore?
 		# reply_to_messages will be send on value inputs (eg notification height)
 		# but also on android when pushing a button. Then we have to switch command and parameter.
