@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-import logging, sarge, hashlib, datetime, time, operator, socket
+import logging, sarge, hashlib, datetime, time, operator, socket, math
 import octoprint.filemanager
 import requests
 from flask.ext.babel import gettext
@@ -652,7 +652,7 @@ class TCMD():
 					for selection in resp2["selections"]:
 						if selection["tool"] == 0:
 							spoolId = selection["spool"]["id"]
-							resp = requests.get("http://localhost:" + str(self.port) + "/plugin/filamentmanager/spools/" + spoolId + "?apikey=" + apikey)
+							resp = requests.get("http://localhost:" + str(self.port) + "/plugin/filamentmanager/spools/" + str(spoolId) + "?apikey=" + apikey)
 							if (resp.status_code != 200):
 								errorText = resp.text
 							resp = resp.json()
@@ -664,8 +664,8 @@ class TCMD():
 							remain = weight - used
 							percent = int(remain / weight * 100)
 							metersConv = spool["profile"]["density"] * (spool["profile"]["diameter"] ** 2) / 4 * math.pi
-							meters = remain / metersConv
-							message += "\nRemaining: " + str(int(remain)) + "g / " + str(int(weight)) + "g (" + meters + "m, " + str(percent) + "%)\n"
+							meters = int(remain / metersConv)
+							message += "\nRemaining: " + str(int(remain)) + "g / " + str(int(weight)) + "g (" + str(meters) + "m, " + str(percent) + "%)\n"
 							msg_id=self.main.getUpdateMsgId(chat_id)
 							self.main.send_msg(message,chatID=chat_id,msg_id = msg_id,inline=False)
 				except ValueError:
