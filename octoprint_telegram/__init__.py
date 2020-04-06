@@ -262,7 +262,7 @@ class TelegramListener(threading.Thread):
 		# handle special messages from groups (/commad@BotName)
 		command = str(message['message']['text'].split('@')[0].encode('utf-8'))
 		parameter = ""
-		if not command.startswith("/"):
+		if not (command.startswith("/") or command == "No"):
 			return
 		# TODO: Do we need this anymore?
 		# reply_to_messages will be send on value inputs (eg notification height)
