@@ -643,6 +643,37 @@ class TCMD():
 			params = parameter.split('_')
 			apikey = self.main._settings.global_get(['api','key'])
 			errorText = ""
+			if params[0] == "current":
+				try:
+					resp2 = requests.get("http://localhost:" + str(self.port) + "/plugin/filamentmanager/selections?apikey=" + apikey)
+					if (resp2.status_code != 200):
+						errorText = resp2.text
+					resp2 = resp2.json()
+					for selection in resp2["selections"]:
+						if selection["tool"] == 0:
+							spoolId = selection["spool"]["id"]
+							resp = requests.get("http://localhost:" + str(self.port) + "/plugin/filamentmanager/spools/" + spoolId + "?apikey=" + apikey)
+							if (resp.status_code != 200):
+								errorText = resp.text
+							resp = resp.json()
+							spool = resp["spool"]
+							self._logger.info("Current spool: %s" % spool)
+							message = "Current spool: " + unicode(spool["profile"]["vendor"]) + " " + unicode(spool["name"]) + " " + unicode(spool["profile"]["material"])										
+							weight = spool["weight"]
+							used = spool["used"]
+							remain = weight - used
+							percent = int(remain / weight * 100)
+							metersConv = spool["profile"]["density"] * (spool["profile"]["diameter"] ** 2) / 4 * math.pi
+							meters = remain / metersConv
+							message += "\nRemaining: " + str(int(remain)) + "g / " + str(int(weight)) + "g (" + meters + "m, " + str(percent) + "%)\n"
+							msg_id=self.main.getUpdateMsgId(chat_id)
+							self.main.send_msg(message,chatID=chat_id,msg_id = msg_id,inline=False)
+				except ValueError:
+					message = self.gEmo('mistake')+" Error getting spools. Are you sure, you have installed the Filament Manager Plugin?"
+					if (errorText != ""):
+						message += "\nError text: " + str(errorText)
+					msg_id=self.main.getUpdateMsgId(chat_id)
+					self.main.send_msg(message,chatID=chat_id,msg_id = msg_id,inline=False)	
 			if params[0] == "spools":
 				try:
 					resp = requests.get("http://localhost:" + str(self.port) + "/plugin/filamentmanager/spools?apikey="+apikey)
@@ -723,6 +754,7 @@ class TCMD():
 		else:
 			message = self.gEmo('info') + " The following Filament Manager commands are known."
 			keys = []
+			keys.append([["Current spool", "/filament_current"]])
 			keys.append([["Show spools","/filament_spools"]])
 			keys.append([["Change spool","/filament_changeSpool"]])
 			keys.append([[self.main.emojis['cross mark']+gettext(" Close"),"No"]])
